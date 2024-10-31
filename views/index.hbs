@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YT Vids</title>
+</head>
+<body>
+  <h1>YT Vids</h1>
+  <form action="/" method="POST">
+    <label for="videoId">Enter Video ID:</label>
+    <input type="text" id="videoId" name="videoId" required>
+    <button type="submit">Search</button>
+  </form>
+
+  {{#if video}}
+    <h2>{{video.snippet.title}}</h2>
+    <p>{{video.snippet.description}}</p>
+    <p>Views: {{video.statistics.viewCount}}</p>
+    <p>Likes: {{video.statistics.likeCount}}</p>
+    <iframe width="560" height="315" src="https://www.youtube.com/embed/{{video.id}}" frameborder="0" allowfullscreen></iframe>
+
+    <h3>Comments</h3>
+    <ul>
+      {{#each comments}}
+        <li>
+          <strong>{{this.authorDisplayName}}:</strong> {{this.textDisplay}}
+        </li>
+      {{/each}}
+    </ul>
+    {{#if nextPageToken}}
+      {{!-- Load more comments async --}}
+      <button id="loadMore" data-next-page-token={{ nextPageToken }}>Load More</button>
+    {{/if}}
+  {{else}}
+    <p>Enter a video ID to see the details and comments.</p>
+  {{/if}}
+</body>
+<script>
+  const loadMoreBtn = document.getElementById('loadMore');
+  const nextPageToken = loadMoreBtn ? loadMoreBtn.getAttribute('data-next-page-token') : null;
+  console.log('current', nextPageToken);
+  if (loadMoreBtn) {
+    loadMoreBtn.addEventListener('click', async () => {
+      console.log('clicked');
+      const res = await fetch(`/videos/${'{{video.id}}'}/comments?pageToken=${nextPageToken}`);
+      const data = await res.json();
+      const comments = data.comments;
+      const updatedNextPageToken = data.nextPageToken;
+
+      comments.forEach(comment => {
+        const li = document.createElement('li');
+        li.innerHTML = `<strong>${comment.authorDisplayName}:</strong> ${comment.textDisplay}`;
+        document.querySelector('ul').appendChild(li);
+      });
+
+      if (!updatedNextPageToken) {
+        loadMoreBtn.remove();
+      }
+      console.log('updated', updatedNextPageToken);
+      loadMoreBtn.setAttribute('data-next-page-token', updatedNextPageToken);
+
+    });
+  }
+</script>
+</html>
