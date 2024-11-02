@@ -1,0 +1,188 @@
+body {
+  background-color: black;
+  color: white;
+}
+
+.source-serif-4-regular {
+  font-family: "Source Serif 4", serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.source-serif-4-semibold {
+  font-family: "Source Serif 4", serif;
+  font-optical-sizing: auto;
+  font-weight: 600;
+  font-style: normal;
+}
+
+.open-sans-regular {
+  font-family: "Open Sans", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: regular;
+  font-style: normal;
+  font-variation-settings:
+    "wdth" 100;
+}
+
+#logo {
+  width: 100px;
+  height: 100px;
+}
+
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+}
+
+header {
+  text-align: center;
+
+  h1 {
+    font-size: 4em;
+  }
+
+  #search {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  input {
+    width: 20rem;
+    padding: 1rem;
+    margin: 1rem 0;
+    font-size: 1.5em;
+    border-radius: 10rem;
+  }
+
+  #searchBtn {
+    background: linear-gradient(to right, #FF7F30 0%, #BCC8CF 100%);
+    background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    border: 2px solid #BCC8CF;
+    width: 10rem;
+    border-radius: 5rem;
+    padding: 1rem 2rem;
+    font-size: 1.5em;
+    cursor: pointer;
+  }
+
+  #searchBtn:hover {
+    background: linear-gradient(to right, #BCC8CF 0%, #FF7F30 100%);
+    background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    border: 2px solid #FF7F30;
+  }
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  #title {
+    width: 75%;
+    text-align: center;
+  }
+
+  .stats {
+    display: flex;
+    width: 560px;
+    justify-content: space-between;
+  }
+
+  #description, .how-to {
+    width: 75%;
+    background-color: #393d3f;
+    padding: 1rem;
+    border-radius: 1rem;
+  }
+
+  .comments {
+    width: 75%;
+
+    h3 {
+      margin-bottom: 0rem;
+    }
+
+    #comments {
+      list-style-type: none;
+      padding-left: 0rem;
+
+
+      li {
+        border-radius: 1rem;
+        margin: 1rem 0;
+      }
+    }
+  }
+
+  #loadMore {
+    background: linear-gradient(to right, #FF7F30 0%, #BCC8CF 100%);
+    background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    border: 2px solid #BCC8CF;
+    width: 10rem;
+    border-radius: 5rem;
+    padding: 0.5rem;
+    font-size: 1em;
+    cursor: pointer;
+  }
+
+  #loadMore:hover {
+    background: linear-gradient(to right, #BCC8CF 0%, #FF7F30 100%);
+    background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    border: 2px solid #FF7F30;
+  }
+}
+
+.tooltip {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: max-content; /* Width of the tooltip box */
+  background-color: #333;
+  color: #fff;
+  text-align: center;
+  padding: 8px;
+  border-radius: 5px;
+
+  /* Positioning */
+  position: absolute;
+  top: 125%; /* Adjust this for spacing from the trigger */
+  left: 100%;
+  transform: translateX(-100%);
+  z-index: 1;
+  
+  /* Transition effect */
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+  opacity: 1;
+}
+
+.error {
+  margin: 1rem 0;
+  background-color: rgb(190, 75, 75);
+  color: white;
+  padding: 1rem;
+  border-radius: 1rem;
+}

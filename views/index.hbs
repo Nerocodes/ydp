@@ -4,63 +4,147 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>YT Vids</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&display=swap" rel="stylesheet">
 </head>
 <body>
-  <h1>YT Vids</h1>
-  <form action="/" method="POST">
-    <label for="videoId">Enter Video ID:</label>
-    <input type="text" id="videoId" name="videoId" required>
-    <button type="submit">Search</button>
-  </form>
+  <nav>
+    <a href="/">
+      <img src="/img/logo.png" alt="YT Vids" id="logo">
+    </a>
+    <div class="tooltip open-sans-regular">
+      How to Use? Test ID: 9rB9XJolncU
+      <span class="tooltiptext open-sans-regular">
+        <p>Enter the video ID of the video you want to watch. The video ID is the string of characters after the "v=" in the URL of the video.</p>
+        <p>For example, in the URL "https://www.youtube.com/watch?v=9rB9XJolncU", the video ID is "9rB9XJolncU".</p>
+      </span>
+    </div>
+  </nav>
+  <header>
+    <h1 class="source-serif-4-semibold">Your Favorite Video Is One <br> Search Away!</h1>
+    <form id="search">
+      <input type="text" id="videoId" name="videoId" placeholder="Enter YouTube Video ID" class="open-sans-regular" required>
+      <button type="submit" id="searchBtn" class="gradient-border open-sans-regular">Search</button>
+    </form>
+  </header>
+  <main class="open-sans-regular">
+    <section class="error" hidden></section>
+    <h2 id="title" hidden="true"></h2>
+    <iframe width="560" height="315" src="" frameborder="0" allowfullscreen id="displayVideo" hidden="true"></iframe>
+    <div class="stats">
+      <p id="views" hidden="true"></p>
+      <p id="likes" hidden="true"></p>
+    </div>
+    <p id="description" hidden="true"></p>
 
-  {{#if video}}
-    <h2>{{video.snippet.title}}</h2>
-    <p>{{video.snippet.description}}</p>
-    <p>Views: {{video.statistics.viewCount}}</p>
-    <p>Likes: {{video.statistics.likeCount}}</p>
-    <iframe width="560" height="315" src="https://www.youtube.com/embed/{{video.id}}" frameborder="0" allowfullscreen></iframe>
+    <section class="comments" hidden="true">
+      <h3>Comments</h3>
+      <ul id="comments" hidden="true">
+      </ul>
+      <button id="loadMore" hidden="true">Load More</button>
+    </section>
+  </main>
 
-    <h3>Comments</h3>
-    <ul>
-      {{#each comments}}
-        <li>
-          <strong>{{this.authorDisplayName}}:</strong> {{this.textDisplay}}
-        </li>
-      {{/each}}
-    </ul>
-    {{#if nextPageToken}}
-      {{!-- Load more comments async --}}
-      <button id="loadMore" data-next-page-token={{ nextPageToken }}>Load More</button>
-    {{/if}}
-  {{else}}
-    <p>Enter a video ID to see the details and comments.</p>
-  {{/if}}
 </body>
 <script>
-  const loadMoreBtn = document.getElementById('loadMore');
-  const nextPageToken = loadMoreBtn ? loadMoreBtn.getAttribute('data-next-page-token') : null;
-  console.log('current', nextPageToken);
-  if (loadMoreBtn) {
-    loadMoreBtn.addEventListener('click', async () => {
-      console.log('clicked');
-      const res = await fetch(`/videos/${'{{video.id}}'}/comments?pageToken=${nextPageToken}`);
-      const data = await res.json();
-      const comments = data.comments;
-      const updatedNextPageToken = data.nextPageToken;
+  const searchForm = document.querySelector('#search');
 
+  searchForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const videoId = document.querySelector('#videoId').value;
+    const res = await fetch(`/videos/${videoId}`);
+    const data = await res.json();
+
+    if (!data.video) {
+      const error = document.querySelector('.error');
+      error.textContent = 'Video not found. Please enter a valid video ID.';
+      error.removeAttribute('hidden');
+      return;
+    } else {
+      const error = document.querySelector('.error');
+      error.setAttribute('hidden', true);
+    }
+
+    const video = data.video;
+    const comments = data.comments;
+    const nextPageToken = data.nextPageToken;
+
+    const h2 = document.querySelector('h2');
+    h2.textContent = video.snippet.title;
+    h2.removeAttribute('hidden');
+
+    const description = document.querySelector('#description');
+    description.textContent = video.snippet.description;
+    description.removeAttribute('hidden');
+
+    const views = document.querySelector('#views');
+    views.textContent = `Views: ${Number(video.statistics.viewCount).toLocaleString()}`;
+    views.removeAttribute('hidden');
+
+    const likes = document.querySelector('#likes');
+    likes.textContent = `Likes: ${Number(video.statistics.likeCount).toLocaleString()}`;
+    likes.removeAttribute('hidden');
+
+    const iframe = document.querySelector('#displayVideo');
+    iframe.src = `https://www.youtube.com/embed/${video.id}`;
+    iframe.removeAttribute('hidden');
+
+    if (comments.length > 0) {
+      const commentsList = document.querySelector('#comments');
+      commentsList.innerHTML = '';
       comments.forEach(comment => {
         const li = document.createElement('li');
         li.innerHTML = `<strong>${comment.authorDisplayName}:</strong> ${comment.textDisplay}`;
-        document.querySelector('ul').appendChild(li);
+        commentsList.appendChild(li);
       });
+      commentsList.removeAttribute('hidden');
+      document.querySelector('.comments').removeAttribute('hidden');
 
-      if (!updatedNextPageToken) {
-        loadMoreBtn.remove();
+      const loadMoreBtn = document.querySelector('#loadMore');
+      const isHidden = loadMoreBtn.getAttribute('hidden');
+
+      if (nextPageToken) {
+        if (isHidden) {
+          loadMoreBtn.removeAttribute('hidden');
+          loadMoreBtn.setAttribute('data-next-page-token', nextPageToken);
+          loadMoreBtn.addEventListener('click', loadMoreComments);
+        } else {
+          loadMoreBtn.setAttribute('data-next-page-token', nextPageToken);
+          loadMoreBtn.addEventListener('click', loadMoreComments);
+        }
+      } else {
+        if (loadMoreBtn) {
+          loadMoreBtn.setAttribute('hidden', true);
+        }
       }
-      console.log('updated', updatedNextPageToken);
-      loadMoreBtn.setAttribute('data-next-page-token', updatedNextPageToken);
+    }
 
+
+  });
+
+  const loadMoreComments = async () => {
+    const loadMoreBtn = document.querySelector('#loadMore');
+    const nextPageToken = loadMoreBtn.getAttribute('data-next-page-token');
+    const videoId = document.querySelector('#videoId').value;
+    const res = await fetch(`/videos/${videoId}/comments?pageToken=${nextPageToken}`);
+    const data = await res.json();
+    const comments = data.comments;
+    const updatedNextPageToken = data.nextPageToken;
+
+    comments.forEach(comment => {
+      const li = document.createElement('li');
+      li.innerHTML = `<strong>${comment.authorDisplayName}:</strong> ${comment.textDisplay}`;
+      document.querySelector('ul').appendChild(li);
     });
-  }
+
+    if (!updatedNextPageToken) {
+      loadMoreBtn.remove();
+    }
+    loadMoreBtn.setAttribute('data-next-page-token', updatedNextPageToken);
+
+  };
 </script>
 </html>

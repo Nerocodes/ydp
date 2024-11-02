@@ -1,10 +1,15 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import axios from 'axios';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class VideosService {
-  private readonly apiKey = 'AIzaSyA0wcSfwoLK-V70qEYokGkodMCc0UFrpac';
+  private readonly apiKey: string;
   private readonly baseUrl = 'https://www.googleapis.com/youtube/v3';
+
+  constructor(private readonly configService: ConfigService) {
+    this.apiKey = this.configService.get<string>('YOUTUBE_API_KEY');
+  }
 
   async getVideo(id: string) {
     try {
@@ -12,6 +17,7 @@ export class VideosService {
       const response = await axios.get(url);
       return response.data;
     } catch (error) {
+      Logger.error(error.message, error.stack, 'VideosController.getVideo');
       throw new HttpException(
         'Failed to fetch video details ' + error.message,
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -19,9 +25,8 @@ export class VideosService {
     }
   }
 
-  async getComments(id: string) {
+  async getComments(id: string, pageToken: string) {
     let comments = [];
-    let pageToken = '';
 
     try {
       const url = `${this.baseUrl}/commentThreads?part=snippet&videoId=${id}&key=${this.apiKey}&pageToken=${pageToken}&maxResults=10`;
@@ -30,10 +35,13 @@ export class VideosService {
       pageToken = response.data.nextPageToken || '';
 
       return {
-        comments,
+        comments: comments.map(
+          (comment) => comment.snippet.topLevelComment.snippet,
+        ),
         nextPageToken: pageToken,
       };
     } catch (error) {
+      Logger.error(error.message, error.stack, 'VideosController.getComments');
       throw new HttpException(
         'Failed to fetch comments' + error.message,
         HttpStatus.INTERNAL_SERVER_ERROR,
