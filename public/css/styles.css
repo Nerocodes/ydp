@@ -197,3 +197,13 @@ main {
     width: 360px;
   }
 }
+
+@media (max-width: 400px) {
+  #displayVideo {
+    width: 260px;
+  }
+
+  main .stats {
+    width: 260px;
+  }
+}
