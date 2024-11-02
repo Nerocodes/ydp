@@ -54,6 +54,10 @@
   searchForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
+    // update search button text to loading while fetching data
+    const searchBtn = document.querySelector('#searchBtn');
+    searchBtn.textContent = 'Loading...';
+
     const videoId = document.querySelector('#videoId').value;
     const res = await fetch(`/videos/${videoId}`);
     const data = await res.json();
@@ -66,6 +70,7 @@
     } else {
       const error = document.querySelector('.error');
       error.setAttribute('hidden', true);
+      searchBtn.textContent = 'Search';
     }
 
     const video = data.video;
