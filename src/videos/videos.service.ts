@@ -18,12 +18,8 @@ export class VideosService {
       const response = await axios.get(url);
       return response;
     } catch (error) {
-      if (
-        error.response &&
-        error.response.status === 429 &&
-        retries < this.maxRetries
-      ) {
-        const delay = Math.pow(2, retries) * 1000; // Exponential backoff
+      if (retries < this.maxRetries) {
+        const delay = Math.pow(2, retries) * 1000;
         this.logger.warn(`Rate limit hit. Retrying in ${delay / 1000}s...`);
         await new Promise((resolve) => setTimeout(resolve, delay));
         return this.fetchWithRetries(url, retries + 1);
@@ -43,7 +39,7 @@ export class VideosService {
       const response = await this.fetchWithRetries(url);
       return response.data;
     } catch (error) {
-      Logger.error(error.message, error.stack, 'VideosController.getVideo');
+      this.logger.error(error.message, error.stack);
       throw new HttpException(
         'Failed to fetch video details ' + error.message,
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -67,7 +63,7 @@ export class VideosService {
         nextPageToken: pageToken,
       };
     } catch (error) {
-      Logger.error(error.message, error.stack, 'VideosController.getComments');
+      this.logger.error(error.message, error.stack);
       throw new HttpException(
         'Failed to fetch comments' + error.message,
         HttpStatus.INTERNAL_SERVER_ERROR,

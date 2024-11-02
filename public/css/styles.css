@@ -186,3 +186,14 @@ main {
   padding: 1rem;
   border-radius: 1rem;
 }
+
+/* add media query for phones */
+@media (max-width: 600px) {
+  #displayVideo {
+    width: 360px;
+  }
+
+  main .stats {
+    width: 360px;
+  }
+}
