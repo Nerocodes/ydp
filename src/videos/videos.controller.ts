@@ -3,9 +3,6 @@ import { VideosService } from './videos.service';
 
 @Controller('videos')
 export class VideosController {
-  private readonly apiKey = 'AIzaSyA0wcSfwoLK-V70qEYokGkodMCc0UFrpac';
-  private readonly baseUrl = 'https://www.googleapis.com/youtube/v3';
-
   constructor(private readonly videosService: VideosService) {}
 
   @Get('/:id')
